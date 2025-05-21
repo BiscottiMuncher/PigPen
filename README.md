@@ -8,7 +8,8 @@ Current Features
 
 - Turn Snort3 On
 - Turn Snort3 Off
-- Web based text editor!
+- Web based text editor
+- Web based file browser!
 
 --- 
 Planned Features
