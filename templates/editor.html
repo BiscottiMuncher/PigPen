@@ -1,0 +1,15 @@
+<head>
+  <title>Edit {{ file_to_edit }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='editor.css') }}">
+</head>
+<body>
+  <h3>Currently Editing: {{ fileToEdit }}</h3>
+  <form method="POST" action="/edit?file={{ fileToEdit }}">
+    <textarea name="content">{{ content }}</textarea><br />
+    <button type="submit">Save</button>
+  </form>
+  <form method="POST" action="/reload">
+      <button type="submit" name="reload">Reload Snort</button>
+    </form>
+</body>
+</html>
