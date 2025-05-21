@@ -17,4 +17,4 @@ Planned Features
 - (Pretty much port some of snort3's functionaly over to Flask)
 
 --- 
-Used best in conjunctionm with Snort3 build auto install 
+Used best in conjunctionm with Snort3 auto install script 
