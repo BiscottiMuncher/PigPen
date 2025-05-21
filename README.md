@@ -8,12 +8,13 @@ Current Features
 
 - Turn Snort3 On
 - Turn Snort3 Off
+- Web based text editor!
 
 --- 
 Planned Features
 
-- Web based Rule editing, creation
-- Web based Config editing, creation
+- Better UI for file handling
+- Edit Snorts arguments as a whole, give more control ver enviornment  
 - (Pretty much port some of snort3's functionaly over to Flask)
 
 --- 
