@@ -124,22 +124,8 @@ def reloadSnort():
 # Restart Snort with new file automatically?
 
 
-## Crude view Local Rules
-@app.route('/viewrules')
-def viewRules():
-        return viewFileContents('/usr/local/etc/rules/local.rules')
-
-## Crude view Current Config
-@app.route('/viewconfig')
-def viewConfig():
-        return viewFileContents('/usr/local/etc/snort/snort.lua')
-
-## View defined log
-@app.route('/viewlog')
-def viewLog():
-        return viewFileContents('/var/log/snort/alert_json.txt')
-
 ## Shitty text editor
+# Half of this thing is stolenbut it works well enough, need to brush up on HTML to make it look purty
 @app.route('/edit', methods=['GET', 'POST'])
 def editFile():
     fileToEdit = request.args.get('file')
@@ -152,8 +138,7 @@ def editFile():
             fp.write(content)
         redirect_url = f'/edit?file={fileToEdit}'
         return redirect(redirect_url)
-
-    # GET method - load file content
+             
     with open(fileToEdit, 'r') as fp:
         content = fp.read()
 
