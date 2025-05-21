@@ -1,0 +1,13 @@
+<head>
+         <link rel="stylesheet" href="{{ url_for('static', filename='editor.css') }}">  
+</head>
+<body>
+<h2> Current File Path: {{ path }} <a href="files?file={{ prevPath }}"> .. </a> </h2>
+<!-- I have hard coded shit in here that needs to get changed -->
+        {% for i in range(0, len) %}
+
+        <p>     <a href="files?file={{ fileList[i] }}"> {{ fileList[i] }} </a> 
+                <a href="edit?file={{ fileList[i] }}"> [EDIT] </a>
+        </p>
+        {%endfor%} 
+</body>
