@@ -17,10 +17,10 @@
 ## Fields
 
 SOCKET="/tmp/snortSock.sock"
-configVar=/usr/local/etc/snort/snort.lua
-rulesetVar=/usr/local/etc/rules/local.rules
-alertTypeVar=alert_json
-loggingDirVar=/var/log/snort/
+#configVar=/usr/local/etc/snort/snort.lua
+#rulesetVar=/usr/local/etc/rules/local.rules
+#alertTypeVar=alert_json
+#loggingDirVar=/var/log/snort/
 
 ## Base snort argument
 
@@ -29,22 +29,20 @@ loggingDirVar=/var/log/snort/
 
 ## Start snort
 startSnort(){
-        #snort -c /usr/local/etc/snort/snort.lua -R /usr/local/etc/rules/local.rules -i eth0 -A alert_json -l /var/log/snort/
-        snort -c "$configVar" -R "$rulesetVar" -i eth0 -A "$alertTypeVar" -l "$loggingDirVar" &
+        ## DO not  try and run it from a different file
+        snort $@ &
         snPid=$!
-        echo "!> STARTED"
+        echo "!> STARTED SNORT"
 }
 
 
 ## GRacefully kill snort when finished
 # Can also apparently use pkill
 killSnort(){
-        echo "!> KILLING"
-        if [ -n "$snPid" ]; then
-                kill -15 "$snPid" && echo "Killed Snort at $snPid"
-        else
-                echo "Snot PID Not Set, Unable to kill"
-        fi
+        ## Changed this from kill to pkill, couldnt easily track the PID across files (I could but im lazy :p )
+        echo "!> KILLING SNORT"
+        # Gracefully kill snort with pkill, easy win
+        pkill -15 snort3
 }
 
 
@@ -52,7 +50,7 @@ killSnort(){
 echo "Handler listening at $SOCKET"
 socat - UNIX-LISTEN:$SOCKET,fork | while read -r cmd; do
         case "$cmd" in
-                start) startSnort ;;
+                start*) args="${cmd#start }"; startSnort $args ;;
                 kill) killSnort ;;
                 quit) break ;;
                 *) echo "Unknown Command $cmd" ;;
