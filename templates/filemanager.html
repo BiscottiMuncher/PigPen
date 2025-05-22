@@ -1,13 +1,36 @@
 <head>
-         <link rel="stylesheet" href="{{ url_for('static', filename='filemanager.css') }}">  
+        <link rel="stylesheet" href="{{ url_for('static', filename='filemanager.css') }}">  
+
+        <div class="topnav">
+                <a class="active" href="/"><bold>PigPen</bold></a>
+                <a href="/">Home</a>
+                <a href="/dirs">Directories</a>
+        </div> 
+
 </head>
 <body>
-<h2> Current File Path: {{ path }} <a href="files?file={{ prevPath }}"> .. </a> </h2>
-<!-- I have hard coded shit in here that needs to get changed -->
-        {% for i in range(0, len) %}
 
-        <p>     <a href="files?file={{ fileList[i] }}"> {{ fileList[i] }} </a> 
-                <a href="edit?file={{ fileList[i] }}"> [EDIT] </a>
-        </p>
+<h3> Current File Path: {{ path }} <a href="files?file={{ prevPath }}"> .. </a> </h3>
+
+        <form method="GET" action="/create">
+                <input type="hidden" name="file" value="{{ path }}"> >
+                <input type="text" name="filename" placeholder="Enter File Name" required>
+                <button type="submit"> Create File </button>
+        
+        </form>
+         
+        {% for i in range(0, len) %}
+                {% if fileList[i].type == 'file': %}
+                        <ul>
+                        <p>      {{ fileList[i].path }} 
+                                <a href="edit?file={{ fileList[i].path }}"> [EDIT] </a>
+                                <a href="delete?file={{ fileList[i].path }}" onclick="return confirm('Are you sure you want to delete this file?');"> [DELETE] </a>
+                        </p>
+                        </ul>
+                {% else %}
+                        <ul>
+                        <p>     <a href="files?file={{ fileList[i].path }}"> {{ fileList[i].path }} </a>
+                        </ul>
+                {% endif %}
         {%endfor%} 
 </body>
