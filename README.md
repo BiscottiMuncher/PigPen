@@ -9,7 +9,8 @@ Current Features
 - Turn Snort3 On
 - Turn Snort3 Off
 - Web based text editor
-- Web based file browser!
+- Web based file browser (File creation and deletion added)
+- Custom Snort CLI argument (Still WIP)
 
 --- 
 Planned Features
