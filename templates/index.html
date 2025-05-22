@@ -1,14 +1,42 @@
-<h2> PigPen </h2>
+<html/>
+<head>
+        <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
 
-    <form method="POST" action="/start">
-      <button type="submit" name="start_button">Start Snort</button>
-    </form>
-    <form method="GET" action="/files">
-      <button type="submit" name="file" value="/usr/local" >File Manager</button>
-    </form>
-    <form method="POST" action="/kill">
-      <button type="submit" name="kill_button">Kill Snort</button>
-    </form>
-    <form method="POST" action="/quit">
-      <button type="submit" name="quit_button">Quit Handler</button>
-    </form>
+</head>
+<body>
+
+        <div class="topnav">
+                <a class="active" href="/"><bold>PigPen</bold></a>
+                <a href="/">Home</a>
+                <a href="/dirs">Directories</a>
+        </div> 
+
+        <div class="textbox">
+        <!--    <h2> PigPen </h2> -->
+                <h2> Status </h2>
+                {% if isSnort == True: %}
+                        <h3 style="color:green"> Running </h3>
+                {% else %}
+                        <h3 style="color:red"> Stopped </h3>
+                {% endif %} 
+
+                <form method="POST" action="/start">
+                         <input type="text" name="snort_args" placeholder="Enter Snort arguments" required>
+                         <button type="submit" name="start_button">Start Snort</button>
+                </form>
+        <!--
+                <form method="GET" action="/dirs">
+                        <button type="submit">Directories</button>
+                </form>
+        -->
+                <form method="POST" action="/kill">
+                        <button type="submit" name="kill_button">Kill Snort</button>
+                </form>
+        <!--
+                <form method="POST" action="/quit">
+                        <button type="submit" name="quit_button">Quit Handler</button>
+                </form>
+        -->
+        </div>
+ </body>
+ </html>
