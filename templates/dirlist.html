@@ -1,0 +1,19 @@
+<head>
+        <link rel="stylesheet" href="{{ url_for('static', filename='filemanager.css') }}">
+        
+        <div class="topnav">
+                <a class="active" href="/"><bold>PigPen</bold></a>
+                <a href="/">Home</a>
+                <a href="/dirs">Directories</a>
+        </div> 
+
+</head>
+<body>
+
+
+        <h3> Quick Access Dirs </h3>
+        {% for i in range(0, len) %} 
+        <ul><p> <a href="/files?file={{ dirs[i] }}"> {{ dirs[i] }} </a> </p> </ul>
+        {% endfor %} 
+
+</body>
