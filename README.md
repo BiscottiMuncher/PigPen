@@ -1,20 +1,22 @@
 # PigPen
-### Snort3 Bash and Python Quasi-API
+### Web based Snort3 admin panel
 
 Very early stages of development
 
 --- 
 Current Features
 
-- Turn Snort3 On
-- Turn Snort3 Off
-- Web based text editor!
+- Turn Snort3 On and Off
+- Web based text editor
+- Web based file browser 
+- Custom Snort argument configs passed to CLI
 
 --- 
 Planned Features
 
-- Better UI for file handling
-- Edit Snorts arguments as a whole, give more control ver enviornment  
+- Better CSS (I am not good at web design)
+- Better site flow
+- Make main web panel useful
 - (Pretty much port some of snort3's functionaly over to Flask)
 
 --- 
