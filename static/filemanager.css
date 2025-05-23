@@ -23,6 +23,28 @@
         color: black;
 }
 
+.textbox {
+        margin-left: 2em;
+}
+
+.textbox button {
+        background-color: #717171;
+        border: none;
+        color: white;
+        padding: 5px 10px;
+        text-align: left;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 13px;
+}
+
 body {
         font-family: monospace;
+}
+
+.status {
+        width: 71px;
+        border-style: solid;
+        text-align: center;
+        margin-bottom: 1em;
 }
