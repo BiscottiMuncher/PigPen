@@ -2,13 +2,15 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='filemanager.css') }}">  
 
         <div class="topnav">
-                <a class="active" href="/"><bold>PigPen</bold></a>
+                <a class="active" href="/"><strong>PigPen</strong></a>
                 <a href="/">Home</a>
                 <a href="/dirs">Directories</a>
+                <a href="/snort"> Snort </a>
         </div> 
 
 </head>
 <body>
+
 
 <h3> Current File Path: {{ path }} <a href="files?file={{ prevPath }}"> .. </a> </h3>
 
@@ -18,7 +20,6 @@
                 <button type="submit"> Create File </button>
         
         </form>
-         
         {% for i in range(0, len) %}
                 {% if fileList[i].type == 'file': %}
                         <ul>
