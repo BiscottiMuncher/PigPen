@@ -2,27 +2,34 @@
 # Controls snorthandler bash script
 
 from flask import Flask, redirect, render_template, request, Response
-import subprocess, socket, os, time
-
-# Very crude view file contents
-def viewFileContents(filePath):
-        with open(filePath, "r") as f:
-                content = f.read()
-        return Response (content, mimetype='text/plain')
+import subprocess, socket, os, time, logging
 
 ## Path to Socket on local machine, this is needef for all comms between snortpipe and webmain
 socketPath = "/tmp/snortSock.sock"
 
 ## Global Snort Running Variable: just here to tell if snort is running or not
-# Need to track ths with a live process, sometimes snort will crash or hang, need to see PID instead of flying blind
+# Need to track ths with a live process, sometimes snort will crash or hang, need to see PID instead of flying blind (Would probably need threading)
 isSnort = False
+snortStartCommand = '' #Not pre-encoded, I lied
 
-snortStartCommand = '' #Pre encoded by the startSnort function
+## Flask instantiation
+# Disabled the logging for now so I can see snort output better
+app = Flask(__name__)
+log = logging.getLogger('werkzeug')
+log.disabled = True
 
-## Start Snortpipe process immedualty
+
+### Reusable functions
+# All functions that are used more than once, hooray for file size
+
+# Super old method, not really used anymore :(
+def viewFileContents(filePath):
+        with open(filePath, "r") as f:
+                content = f.read()
+        return Response (content, mimetype='text/plain')
+
+## Start Snortpipe process right away
 def startSnortPipe():
-        global isSnort
-        print(isSnort)
         scriptPath = os.path.join(os.path.dirname(__file__), 'snortpipe.sh')
         subprocess.run(f"{scriptPath} &", shell=True)
         #subprocess.run(["/root/scripts/pigpen/project/snortpipe.sh &"], shell=True)
@@ -55,7 +62,8 @@ def intKillSnort():
         return redirect('/')
 
 ##Internal Start Snort func
-## Reworked to work with the new way snort starts up
+# Reworked to work with the new way snort starts up
+# Really only used for reload in text editor
 def intStartSnort():
         global isSnort
         global snortStartCommand
@@ -63,16 +71,19 @@ def intStartSnort():
         if not isSnort:
                 with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
                         client.connect(socketPath)
-                        client.sendall(snortStartCommand) # <- new shit
+                        client.sendall(snortStartCommand.encode()) # <- new shit
                         isSnort = True
         else:
                  print("Snort Already Running")
         return redirect('/')
 
-# DEfine flask app name
-app = Flask(__name__)
+
+### Route Functions
+# Functions that are used for routing to pages, and things like that, one time use
 
 ## Path to main page, just index
+# Nothing on this for now, moving everything to seperate pages, will do something with it soon.
+# Might want to do a main web panel kind of deal
 @app.route('/')
 def main():
         global isSnort
@@ -83,6 +94,21 @@ def main():
 # kill: Kills current snort session aslong as there is a session runnign
 # quit: Quits handler script and kills current snort session if there is one running
 
+## Snort main page
+# new way of handling snort starting, takes in all the files in the snort conf dir, spits them out to html land and then lets then be used as start up commands
+@app.route('/snort', methods=['GET','POST'])
+def snortMain():
+        global isSnort
+        fileList = fileManager('/usr/local/etc/snort/conf')
+        fileContent = []
+        # For loop to read through files and place contents in html land
+        for fileObj in fileList:
+                if fileObj['type'] == 'file':
+                        with open(fileObj['path'], 'r') as file: #I hate the way this object works :D
+                                digest = file.read()
+                                fileContent.append({'digest': digest, 'path':fileObj['path']})
+        return render_template('snortmain.html', fileContent = fileContent, isSnort = isSnort)
+
 ## Starts Snort Session
 # Changed this one up a lot, it sends arguments over to snortpipe and they get executed there, this is good for flexibility
 # Need to find a way of saving them all somewhere on the server so thay they user doesnt have to type them in one million times
@@ -92,18 +118,17 @@ def startSnort():
         global snortStartCommand
         userSnortCommand = request.form.get('snort_args', '').strip()
         startCommand = f"start {userSnortCommand}\n"
-        snortStartCommand = startCommand.encode()
+        snortStartCommand = startCommand
+        print(f"Starting Snort with: {snortStartCommand}")
         if not isSnort:
-                if 'start_button' in request.form:
+                if 'snort_args' in request.form:
                         with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
                                 client.connect(socketPath)
                                 client.sendall(startCommand.encode())
                                 isSnort = True
         else:
                 print("Snort Already Running")
-
-        return render_template('index.html', isSnort = isSnort)
-
+        return redirect('/snort')
 
 ## Kills Snort Process
 # Needs Snort PID, need to add check to see whether or not snort is actually running
@@ -118,9 +143,9 @@ def killSnort():
                                 isSnort = False
         else:
                 print("Snort Not Running")
-        return render_template('index.html', isSnort = isSnort)
+        return redirect('/snort')
 
-## Kills Handler Session
+## Kills Handler Session (Not really used anymore)
 # Kills handler session and Snort session at the same time for a safe shutdown
 @app.route('/quit', methods=['POST'])
 def killHandler():
@@ -147,8 +172,9 @@ def reloadSnort():
         return render_template('index.html', isSnort = isSnort)
 
 
-## Shitty text editor
+## Text editor
 # like 90% of this is stolen
+# prebuilt ones were all rich text (yuck)
 @app.route('/edit', methods=['GET', 'POST'])
 def editFile():
         fileToEdit = request.args.get('file') #Set file to browser argument, handy
@@ -175,16 +201,14 @@ def createFile():
         fileName = request.args.get('filename')
         currDir = os.path.abspath(filePath.rstrip('/'))
         fullName = os.path.join(currDir, fileName)
-#       print(currDir + "CurrDir")
-#       print(fullName + "FileName")
-        ## Create file logic
+        ## Create file
         with open(fullName, "w") as newFile:
                 newFile.write("")
-#       print("created File")
-#               dont really need this newFile.close()
         return redirect(f'/edit?file={fullName}')
 
 
+## Delete method
+# Literally just OS delete at file location, nothing special
 @app.route('/delete', methods=['GET', 'POST'])
 def deleteFile():
         fileToDel = request.args.get('file') #Set file to browser argument, handy
@@ -192,9 +216,7 @@ def deleteFile():
         if not fileToDel or not os.path.isfile(fileToDel):
                 return "File doesnt exist", 404
         if request.method == 'GET':
-#               print(f"Deleting {fileToDel}")
                 os.remove(fileToDel)
-#               print("Removed File")
         return redirect(f'/files?file={currDir}')
 
 ## File manager idea
@@ -205,7 +227,6 @@ def fileHandler():
         filePath = request.args.get('file') #File path passed in Via URL, can now use redirects
         prevPath = os.path.dirname(filePath.rstrip('/')) #Tracker for previous path when the user wants to back up, needed to add rstrip for proper directory traversal
         fileList = fileManager(filePath)
-#       print(fileList)
         return render_template('filemanager.html', fileList = fileList, path = filePath, len = len(fileList), prevPath = prevPath)
 
 
@@ -213,10 +234,10 @@ def fileHandler():
 # Logs, configs, things like that all in one place
 @app.route('/dirs', methods=['GET'])
 def dirList():
-        dirs = ['/usr/local/etc', '/var/log/snort']
+        dirs = ['/usr/local/etc','/usr/local/etc/snort/conf' ,'/var/log/snort']
         return render_template('dirlist.html', dirs = dirs, len = len(dirs))
 
 ## Main function
 if __name__ == '__main__':
         startSnortPipe()
-        app.run(host='0.0.0.0', port=5959)
+        app.run(host='0.0.0.0', port=5959) #Random port for funsies
