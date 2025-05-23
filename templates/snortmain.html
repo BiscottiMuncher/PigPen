@@ -1,0 +1,43 @@
+<html>
+        <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+
+</head>
+<body>
+        <div class="topnav">
+                <a class="active" href="/"><strong>PigPen</strong></a>
+                <a href="/">Home</a>
+                <a href="/dirs">Directories</a>
+                <a href="/snort"> Snort </a>
+        </div>
+
+        <div class="textbox">
+        <!-- Take in a list of snort arguments, either created by the user or program, list them as buttons to click to start snort -->
+        <h2> Snort Control </h2>
+
+        <div class="status">
+                <h2> Status </h2>
+                {% if isSnort == True: %}
+                        <h3 style="color:green"> Running </h3>
+                {% else %}
+                        <h3 style="color:red"> Stopped </h3>
+                {% endif %}
+        </div>
+
+                <form method="POST" action="/kill">
+                        <button type="submit" name="kill_button">Kill Snort</button>
+                </form>
+        <hr>
+
+        <h2> Snort Start Arguments </h2>
+
+        <!-- Button logic here when I return the shit -->
+        {% for file in fileContent %}
+                        <ul>
+                                <form method="POST" action="/start">
+                                         <button type="submit" name="snort_args" value="{{ file.digest }}">{{ file.path }}</button>
+                                </form>
+                        </ul>
+        {%endfor%}
+        </div>
+</body>
+</html>
