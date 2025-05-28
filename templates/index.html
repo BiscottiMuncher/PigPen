@@ -1,4 +1,4 @@
-<html/>
+<html>
 <head>
         <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
 
@@ -11,32 +11,48 @@
                 <a href="/dirs">Directories</a>
                 <a href="/snort"> Snort </a>
         </div> 
-<!--
+
+<div class="split left">
         <div class="textbox">
-                <h2> PigPen </h2> 
-                <h2> Status </h2>
-                {% if isSnort == True: %}
-                        <h3 style="color:green"> Running </h3>
-                {% else %}
-                        <h3 style="color:red"> Stopped </h3>
-                {% endif %} 
+                <div class="status">
+                        <h2> PigPen </h2> 
+                        <h2> Status </h2>
+                        {% if isSnort == True: %}
+                                <h3 style="color:green"> Running </h3>
+                        {% else %}
+                                <h3 style="color:red"> Stopped </h3>
+                        {% endif %} 
+                </div>
 
-
-
-                <form method="POST" action="/start">
-                         <input type="text" name="snort_args" placeholder="Enter Snort arguments" required>
-                         <button type="submit" name="start_button">Start Snort</button>
-                </form>
-                <form method="GET" action="/dirs">
-                        <button type="submit">Directories</button>
-                </form>
-                <form method="POST" action="/kill">
+<!--            <form method="POST" action="/kill">
                         <button type="submit" name="kill_button">Kill Snort</button>
                 </form>
                 <form method="POST" action="/quit">
                         <button type="submit" name="quit_button">Quit Handler</button>
                 </form>
-        -->
+
+-->
+</div>
+
+</div>
+
+<div class="split right">
+        <h2> How to Use </h2>
+        <ul>
+
+                <h4> Edit, delete and create files, configs, start up scripts, and anything else in <a href="/dirs"> Directories </a> </h4>
+                <p>     - Files created in configs will be used as startup configurations for snort, see example.conf for example</p>
+                <h4> Start Snort and monitor terminal output in <a href="/snort"> Snort </a> </h4>
+                <p>     - Snort is fully controlled here, all terminal output is shown to the right of the screen </p>
+
+
+
+        </ul>
+
+
+
+</div>
+
         </div>
  </body>
  </html>
