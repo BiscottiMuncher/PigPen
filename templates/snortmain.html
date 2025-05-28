@@ -1,14 +1,18 @@
 <html>
-        <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='snortmain.css') }}">
 
 </head>
 <body>
+
         <div class="topnav">
                 <a class="active" href="/"><strong>PigPen</strong></a>
                 <a href="/">Home</a>
                 <a href="/dirs">Directories</a>
                 <a href="/snort"> Snort </a>
         </div>
+
+<!-- Split screen left -->
+<div class="split left">
 
         <div class="textbox">
         <!-- Take in a list of snort arguments, either created by the user or program, list them as buttons to click to start snort -->
@@ -26,7 +30,9 @@
                 <form method="POST" action="/kill">
                         <button type="submit" name="kill_button">Kill Snort</button>
                 </form>
+
         <hr>
+
 
         <h2> Snort Start Arguments </h2>
 
@@ -39,5 +45,40 @@
                         </ul>
         {%endfor%}
         </div>
+
+</div>
+
+
+<!-- Split screen right -->
+<div class="split right">
+<!-- STOLEN CHATGPT JS I hate this language -->
+        <div id="snort-output" style="background-color:black; color:lime; font-family: monospace; white-space: pre-line; height: 80%; width: 99%; overflow-y: scroll;">
+        </div>
+        <script>
+          async function refreshSnortOutput() {
+            try {
+              const response = await fetch('/out');
+              if (!response.ok) throw new Error('Network error');
+              const html = await response.text();
+              const outputDiv = document.getElementById('snort-output');
+              const atBottom = outputDiv.scrollHeight - outputDiv.scrollTop <= outputDiv.clientHeight + 5;
+              outputDiv.insertAdjacentHTML('beforeend', html);
+              if (atBottom) {
+                outputDiv.scrollTop = outputDiv.scrollHeight;
+              }
+            } catch (err) {
+              console.error('Failed to load snort output:', err);
+            }
+          }
+          setInterval(refreshSnortOutput, 2000);
+          refreshSnortOutput();
+        </script>
+
+
+</div>
+
 </body>
+
+
+
 </html>
