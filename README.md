@@ -10,6 +10,8 @@ Current Features
 - Web based text editor
 - Web based file browser 
 - Custom Snort argument configs passed to CLI
+- Snort termianl output
+- Slightly better CSS
 
 --- 
 Planned Features
