@@ -44,10 +44,11 @@ body {
 }
 
 .status {
-        width: 71px;
+        width: 92px;
         border-style: solid;
         text-align: center;
         margin-bottom: 1em;
+        margin-left: -16; */ Dont thing about this one too much
 }
 
 .split {
@@ -67,4 +68,11 @@ body {
 
 .left {
         left: 0;
+}
+
+.credit {
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        text-align: center;
 }
