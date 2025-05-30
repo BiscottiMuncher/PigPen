@@ -38,41 +38,36 @@
         font-size: 13px;
 }
 
+hr {
+        width: 95%;
+        margin: 0px;
+}
 
 body {
         font-family: monospace;
 }
 
 .status {
-        width: 92px;
+        width: 71px;
         border-style: solid;
         text-align: center;
         margin-bottom: 1em;
-        margin-left: -16; */ Dont thing about this one too much
 }
 
 .split {
         height: 80%;
-        width: 80%;
+        width: 50%;
         position: fixed;
         z-index: 1;
         top: 50px;
         overflow-x: hidden;
-        margin-top: 2%;
+        padding-top: 30px;
 }
 
-
 .right {
-        right: 5%;
+        right: 0;
 }
 
 .left {
         left: 0;
-}
-
-.credit {
-        position: fixed;
-        bottom: 0;
-        left: 50%;
-        text-align: center;
 }
