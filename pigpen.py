@@ -2,17 +2,12 @@
 # Bash script no more
 
 from flask import Flask, redirect, render_template, request, Response
-import subprocess, socket, os, time, logging, signal, fcntl
-
-## Path to Socket on local machine, this is needef for all comms between snortpipe and webmain
-#socketPath = "/tmp/snortSock.sock"
-#termSocket = "/tmp/termSock.sock"
+import subprocess, socket, os, time, logging, signal, fcntl, sys # Thank you python for you totally not bloated packages
 
 ##Global Snort Running Variable: just here to tell if snort is running or not
-# Need to track ths with a live process, sometimes snort will crash or hang, need to see PID instead of flying blind (Would probably need threading)
-isSnort = False
-lastCommand = ''
-snort = None
+isSnort = False  # Simple tracker for snort status
+lastCommand = '' # Stores last executed command for tracking sake, might want to move this to a file so that snort can start automatically when the program starts?
+snort = None     # Global snort tracker, tracks running process
 
 ## Flask instantiation
 # Disabled the logging for now so I can see snort output better
@@ -20,21 +15,31 @@ app = Flask(__name__)
 log = logging.getLogger('werkzeug')
 log.disabled = True
 
+## Start up Function
+# Checks to see if the needed folders are there, if not they are created
+def startUpCheck():
+        # Dirlist can be changed if need be, these are jsut the directories that are somewhat hardcoded into the program
+        dirList = ['/usr/local/etc/snort','/usr/local/etc/lists','/usr/local/etc/rules','/usr/local/etc/so_rules','/usr/local/etc/snort/conf','/var/log/snort']
+        ## Checks to see if Snort command can be executed
+        snortCheck = subprocess.run(['snort','-V'], stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,bufsize=1)
+        returnCode = snortCheck.returncode
+        if returnCode != 0:
+                print("\033[1;31m >>> Please Install Sort <<<\033[0m")
+                sys.exit(1)
+        else:
+                print("\033[1;32m >> Snort Install Found << \033[0m")
+                pass
+        ## Checks to see if there are any needed dirs missing
+        for dir in dirList:
+                if os.path.isdir(dir):
+                        pass
+                else:
+                        print(f"{dir} doesnt exist, creating")
+                        os.mkdir(dir)
+                        print(f"Created {dir}")
+
 ### Reusable functions
 # All functions that are used more than once, hooray for file size
-
-# Super old method, not really used anymore :(
-def viewFileContents(filePath):
-        with open(filePath, "r") as f:
-                content = f.read()
-        return Response (content, mimetype='text/plain')
-
-### TRYING TO REMOVE
-## Start Snortpipe process right away
-def startSnortPipe():
-        scriptPath = os.path.join(os.path.dirname(__file__), 'snortpipe.sh')
-        subprocess.run(f"{scriptPath} &", shell=True)
-
 
 ## Very simple file display for file manager, modified to show folders, subdirs, and internal files. Added type field for HTML orgnization
 def fileManager(filePath):
@@ -56,15 +61,12 @@ def intKillSnort():
         global isSnort
         global snort
         if isSnort:
-                print("KILLING SNORT")
                 snort.send_signal(signal.SIGINT)
-                print("KILLED SNORT!")
                 isSnort = False
                 snort = None
         else:
                 print("Snort Not Running")
         return redirect('/')
-
 
 #### MIGHT NOT NEED THIS LATER ON
 ##Internal Start Snort func
@@ -74,14 +76,13 @@ def intStartSnort():
         global isSnort
         global lastCommand
         global snort
-        print(f"Snort Status: {isSnort}")
+#       print(f"Snort Status: {isSnort}")
         if not isSnort:
                 snort = subprocess.Popen(lastCommand,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,bufsize=1)
                 isSnort = True
         else:
                 print("Snort Already Running")
         return redirect('/')
-
 
 ### Route Functions
 # Functions that are used for routing to pages, and things like that, one time use
@@ -141,47 +142,30 @@ def killSnort():
         global snort
         if isSnort:
                 if 'kill_button' in request.form:
-#                       print("KILLING SNORT")
                         snort.send_signal(signal.SIGINT)
-#                       print("KILLED SNORT!")
                         isSnort = False
                         snort = None
         else:
                 print("Snort Not Running")
         return redirect('/snort')
 
-
-#### MAY NOT NEED THIS
-## Kills Handler Session (Not really used anymore)
-# Kills handler session and Snort session at the same time for a safe shutdown
-@app.route('/quit', methods=['POST'])
-def killHandler():
-        global isSnort
-        if 'quit_button' in request.form:
-                killSnort
-                with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
-                        client.connect(socketPath)
-                        client.sendall(b"quit\n")
-        return render_template('index.html', isSnort = isSnort )
-
-
-## Reload route (Deprecated unless I add it to the main snort page)
+## Reload route
+# Added this to the snort control page for quicker reloads
 # Used when you just need to quickly restart snort, upates to files, and so on
 @app.route('/reload', methods=['POST'])
 def reloadSnort():
         global isSnort
-        if 'reload' in request.form:
+        if 'reload' in request.form and isSnort:
                 intKillSnort()
-                print("Reloading Snort")
-                time.sleep(5)
-                print("Starting Snort")
+                time.sleep(1)
                 intStartSnort()
-        return render_template('index.html', isSnort = isSnort)
+        else:
+                print("Snort is not running")
+        return redirect('/snort')
 
 ## Text editor
 # like 90% of this is stolen
 # prebuilt ones were all rich text (yuck)
-# made the reload button actually save your work before redirect
 @app.route('/edit', methods=['GET', 'POST'])
 def editFile():
         fileToEdit = request.args.get('file') #Set file to browser argument, handy
@@ -196,36 +180,6 @@ def editFile():
         with open(fileToEdit, 'r') as filePtr:
                 content = filePtr.read()
         return render_template('editor.html', content=content, fileToEdit=fileToEdit)
-
-
-## Broken version of the script, opens files but deltes all contents :(
-#app.route('/edit', methods=['GET', 'POST'])
-def aeditFile():
-        fileToEdit = request.args.get('file') #Set file to browser argument, handy
-        if not fileToEdit or not os.path.isfile(fileToEdit):
-                return "File doesont exist", 404
-        if request.method == 'POST':
-                content = request.form.get('content')
-                with open(fileToEdit, 'w') as filePtr:
-                        filePtr.write(content)
-                redirectUrl = f'/edit?file={fileToEdit}'
-                return redirect(redirectUrl)
-        elif 'reload' in request.form:
-                content = request.form.get('content')
-                with open(fileToEdit, 'w') as filePtr:
-                        filePtr.write(content)
-                # Reload snort and then redirect
-                intKillSnort()
-                print("Reloading Snort")
-                time.sleep(5)
-                print("Starting Snort")
-                intStartSnort()
-                redirectUrl = f'/edit?file={fileToEdit}'
-                return redirect(redirectUrl)
-        with open(fileToEdit, 'r') as filePtr:
-                content = filePtr.read()
-        return render_template('editor.html', content=content, fileToEdit=fileToEdit)
-
 
 ## Need add a way to create files
 # Get current directory
@@ -285,7 +239,7 @@ def getOutput():
         fcntl.fcntl(fd, fcntl.F_SETFL, flags | os.O_NONBLOCK) # Sets all flags with O_NONBLOCK using F_SETFL (Add provided property to provided flags of provided FD)
         output = ""
         while True:
-                chunk = snort.stdout.read(1024) # File (STDOUT) has proper read permissions now, can append to buffer
+                chunk = snort.stdout.read(1024) # FD (STDOUT) has proper permissions, can append to buffer
                 if not chunk:
                         break
                 output += chunk
@@ -293,4 +247,5 @@ def getOutput():
 
 ## Main function
 if __name__ == '__main__':
-        app.run(host='0.0.0.0', port=5959) #Random port for funsies
+        startUpCheck() #Startup check for snort, see function def for docs
+        app.run(host='0.0.0.0', port='9091') #Random port for funsies
