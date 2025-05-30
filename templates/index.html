@@ -1,7 +1,6 @@
 <html>
 <head>
         <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
-
 </head>
 <body>
 
@@ -23,36 +22,26 @@
                                 <h3 style="color:red"> Stopped </h3>
                         {% endif %} 
                 </div>
-
-<!--            <form method="POST" action="/kill">
-                        <button type="submit" name="kill_button">Kill Snort</button>
-                </form>
-                <form method="POST" action="/quit">
-                        <button type="submit" name="quit_button">Quit Handler</button>
-                </form>
-
--->
 </div>
-
 </div>
-
 <div class="split right">
         <h2> How to Use </h2>
         <ul>
 
-                <h4> Edit, delete and create files, configs, start up scripts, and anything else in <a href="/dirs"> Directories </a> </h4>
-                <p>     - Files created in configs will be used as startup configurations for snort, see example.conf for example</p>
+                <h4> Edit, delete, create files, configs, or anything else in <a href="/dirs"> Directories </a> </h4>
+                <p>     - Files created in "/conf" will be used as startup configurations, "snort" does not need to be specified in the configuration file</p>
+                <pre>- Example:<i>"-c /usr/local/etc/snort/snort.lua -R /usr/local/etc/rules/local.rules -i eth0 -A alert_full -l /var/log/snort"</i></pre> 
+                <pre>    - Saved as example.conf in "/usr/local/snort/conf/" with the inbuilt file explorer </pre> 
                 <h4> Start Snort and monitor terminal output in <a href="/snort"> Snort </a> </h4>
                 <p>     - Snort is fully controlled here, all terminal output is shown to the right of the screen </p>
-
-
-
         </ul>
-
-
-
 </div>
 
         </div>
  </body>
+        
+<div class="credit">
+
+        <small> <a href="https://github.com/BiscottiMuncher/PigPen"> Evan Metzinger </a> 2025  </small>
+</div>
  </html>
